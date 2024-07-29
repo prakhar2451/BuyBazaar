@@ -1,4 +1,4 @@
-name: CI/CD
+name: Build and Push Docker Image
 
 on:
   push:
@@ -25,6 +25,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./user-service  
+          file: ./user-service/Dockerfile
           push: true
           tags: curiousss3399/buybazaar-user-service:latest
