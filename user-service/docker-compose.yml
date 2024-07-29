@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    container_name: buybazaar-postgres
+    environment:
+      POSTGRES_DB: buybazaar
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234abcd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  user-service:
+    image: buybazaar-user-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://buybazaar-postgres:5432/buybazaar
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234abcd
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+
+volumes:
+  postgres_data:
