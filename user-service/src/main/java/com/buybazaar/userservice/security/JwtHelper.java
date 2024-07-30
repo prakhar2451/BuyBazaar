@@ -14,7 +14,7 @@ import java.util.function.Function;
 public class JwtHelper {
 
     private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
-    private static final String SECRET_KEY = "your-secret-key";
+    private static final String SECRET_KEY = "mycatwafflehewasagreatcatilovedhimsomuchbutheranawayVERYFARAWAYFROMMEWIHOUTTELLINGMEidontknowwhyheranafterthethatlocalcatinrainyseason";
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
