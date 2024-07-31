@@ -16,6 +16,9 @@ public class ProductDTO {
 
     private String id;
 
+    @NotBlank(message = "Category is required")
+    private String category;
+
     @NotBlank(message = "Product name is required")
     private String name;
 
