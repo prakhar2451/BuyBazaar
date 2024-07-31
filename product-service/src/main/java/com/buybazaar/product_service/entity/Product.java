@@ -19,8 +19,11 @@ public class Product {
     @Id
     private String id;
 
-    @NotNull(message = "Category is required")
+    @NotBlank(message = "Category is required")
     private String category;
+
+    @NotBlank(message = "Sub-category is required")
+    private String subCategory;
 
     @NotBlank(message = "Product name is required")
     private String name;
