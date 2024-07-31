@@ -38,3 +38,5 @@ jobs:
           file: ./user-service/Dockerfile
           push: true
           tags: curiousss3399/buybazaar-user-service:latest
+
+      - name:
