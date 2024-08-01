@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -48,6 +49,8 @@ public class ProductServiceImpl implements ProductService {
         try{
             Product existingProduct = productRepository.findById(productId).orElseThrow(()-> new ResourceNotFoundExcpetion("Product","ID",productId));
             existingProduct.setName(productDTO.getName());
+            existingProduct.setCategory(productDTO.getCategory());
+            existingProduct.setSubCategory(productDTO.getSubCategory());
             existingProduct.setDescription(productDTO.getDescription());
             existingProduct.setPrice(productDTO.getPrice());
             existingProduct.setQuantity(productDTO.getQuantity());
@@ -81,6 +84,37 @@ public class ProductServiceImpl implements ProductService {
         } catch (Exception e) {
             logger.error("Error occurred while fetching product with ID: {}", productId, e);
             throw new RuntimeException("Error occurred while fetching product.");
+        }
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByCategory(String category) {
+        try {
+            List<Product> products = productRepository.findByCategory(category);
+            List<ProductDTO> productDTOs = products.stream()
+                    .map(product -> modelMapper.map(product, ProductDTO.class))
+                    .collect(Collectors.toList());
+            logger.info("Fetched {} products for category {}", productDTOs.size(), category);
+            return productDTOs;
+        } catch (Exception e) {
+            logger.error("Error occurred while fetching products for category {}: {}", category, e.getMessage(), e);
+            throw new RuntimeException("Error occurred while fetching products.");
+        }
+    }
+
+    @Override
+    public List<ProductDTO> getProductsBySubCategory(String subCategory) {
+
+        try {
+            List<Product> products = productRepository.findBySubCategory(subCategory);
+            List<ProductDTO> productDTOs = products.stream()
+                    .map(product -> modelMapper.map(product, ProductDTO.class))
+                    .toList();
+            logger.info("Fetched {} products for subcategory {}", productDTOs.size(), subCategory);
+            return productDTOs;
+        } catch (Exception e) {
+            logger.error("Error occurred while fetching products for category {}: {}", subCategory, e.getMessage());
+            throw new RuntimeException("Error occurred while fetching products.");
         }
     }
 

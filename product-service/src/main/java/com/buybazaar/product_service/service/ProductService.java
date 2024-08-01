@@ -11,6 +11,9 @@ public interface ProductService {
     ProductDTO createProduct(ProductDTO productDTO);
     ProductDTO updateProduct(String productId, ProductDTO productDTO);
     Optional<ProductDTO> getProductById(String productId);
+    List<ProductDTO> getProductsByCategory(String category);
+    List<ProductDTO> getProductsBySubCategory(String subCategory);
     List<ProductDTO> getAllProducts();
     void deleteProduct(String productId);
+
 }

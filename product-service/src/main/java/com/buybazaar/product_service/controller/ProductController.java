@@ -86,4 +86,22 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable String category) {
+        List<ProductDTO> productDTOs = productService.getProductsByCategory(category);
+        if (productDTOs.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(productDTOs);
+    }
+
+    @GetMapping("/subcategory/{subCategory}")
+    public ResponseEntity<List<ProductDTO>> getProductsBySubCategory(@PathVariable String subCategory) {
+        List<ProductDTO> productDTOs = productService.getProductsBySubCategory(subCategory);
+        if (productDTOs.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(productDTOs);
+    }
+
 }
