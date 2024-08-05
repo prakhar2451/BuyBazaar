@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -47,6 +49,19 @@ public class UserServiceImpl implements UserService {
 
             User user = modelMapper.map(userDTO, User.class);
 
+            if (userDTO.getRoles() != null && !userDTO.getRoles().isEmpty()) {
+                Set<Role> roles = userDTO.getRoles().stream()
+                        .map(roleName -> {
+                            Role role = roleRepository.findByName(roleName);
+                            if (role == null) {
+                                throw new IllegalArgumentException("Role not found: " + roleName);
+                            }
+                            return role;
+                        })
+                        .collect(Collectors.toSet());
+                user.setRoles(roles);
+                logger.info("Roles assigned: " + roles);
+            }
             user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
             User savedUser = userRepository.save(user);
@@ -90,9 +105,6 @@ public class UserServiceImpl implements UserService {
             existingUser.setUsername(userDTO.getUsername());
             existingUser.setEmail(userDTO.getEmail());
             existingUser.setFullName(userDTO.getFullname());
-            if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-                existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-            }
             existingUser.setUpdatedAt(LocalDateTime.now());
 
             User updatedUser = userRepository.save(existingUser);

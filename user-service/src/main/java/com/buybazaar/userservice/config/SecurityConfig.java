@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .cors(cors->cors.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/create","/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
