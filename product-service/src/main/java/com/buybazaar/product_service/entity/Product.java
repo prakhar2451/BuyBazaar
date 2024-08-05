@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Product {
 
     @Id
-    private String id;
+    private String productId;
 
     @NotBlank(message = "Category is required")
     private String category;
@@ -26,15 +26,11 @@ public class Product {
     private String subCategory;
 
     @NotBlank(message = "Product name is required")
-    private String name;
+    private String productName;
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be a positive number")
     private Double price;
-
-    @NotNull(message = "Quantity is required")
-    @Positive(message = "Quantity must be a positive number")
-    private Integer quantity;
 
     private String description;
 

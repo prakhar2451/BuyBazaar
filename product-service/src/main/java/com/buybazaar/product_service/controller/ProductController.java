@@ -33,7 +33,7 @@ public class ProductController {
     public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
         try {
             ProductDTO createdProductDTO = productService.createProduct(productDTO);
-            logger.info("Product created successfully with ID: {}", createdProductDTO.getId());
+            logger.info("Product created successfully with ID: {}", createdProductDTO.getProductId());
             return new ResponseEntity<>(createdProductDTO, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("Error occurred while creating product: {}", e.getMessage(), e);

@@ -14,7 +14,7 @@ import javax.validation.constraints.PositiveOrZero;
 @AllArgsConstructor
 public class ProductDTO {
 
-    private String id;
+    private String productId;
 
     @NotBlank(message = "Category is required")
     private String category;
@@ -23,7 +23,7 @@ public class ProductDTO {
     private String subCategory;
 
     @NotBlank(message = "Product name is required")
-    private String name;
+    private String productName;
 
     @NotBlank(message = "Product description is required")
     private String description;
@@ -32,7 +32,6 @@ public class ProductDTO {
     @Positive(message = "Product price must be positive")
     private Double price;
 
-    @NotNull(message = "Product quantity is required")
-    @PositiveOrZero(message = "Product quantity must be zero or positive")
-    private Integer quantity;
+
+
 }

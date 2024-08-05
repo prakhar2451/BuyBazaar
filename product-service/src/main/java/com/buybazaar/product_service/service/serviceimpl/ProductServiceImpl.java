@@ -1,5 +1,6 @@
 package com.buybazaar.product_service.service.serviceimpl;
 
+import com.buybazaar.product_service.dto.InventoryDTO;
 import com.buybazaar.product_service.dto.ProductDTO;
 import com.buybazaar.product_service.entity.Product;
 import com.buybazaar.product_service.exceptions.ResourceNotFoundExcpetion;
@@ -9,12 +10,16 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.lang.Thread.sleep;
 
 
 @Service
@@ -28,45 +33,97 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private static final String INVENTORY_SERVICE_URL = "http://localhost:8082/api/inventory/updateFromProduct";
+
 
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
         try {
+            // Map ProductDTO to Product entity
             Product product = modelMapper.map(productDTO, Product.class);
+
+            // Save the product in the repository
             Product savedProduct = productRepository.save(product);
+
+            // Map the saved product to ProductDTO for response
             ProductDTO createdProductDTO = modelMapper.map(savedProduct, ProductDTO.class);
-            logger.info("Product created successfully.");
+
+            // Log product creation success
+            logger.info("Product created successfully with ID: {}", createdProductDTO.getProductId());
+            // Update or create inventory for the new product
+            autoUpdateInventory(createdProductDTO);
+
+            // Return the created product DTO
             return createdProductDTO;
         } catch (Exception e) {
+            // Log error details
             logger.error("Error occurred while creating product: {}", e.getMessage(), e);
-            throw new RuntimeException("Error occurred while creating product.");
+
+            // Optionally, you might throw a custom exception or handle it differently
+            throw new RuntimeException("Error occurred while creating product.", e);
+        }
+    }
+    private void autoUpdateInventory(ProductDTO productDTO) {
+        try {
+            // Define the URL for the inventory service endpoint
+            String url = "http://localhost:8082/api/inventory/createOrUpdateInventory";
+
+            // Create an InventoryDTO with correct values
+            InventoryDTO inventoryDTO = new InventoryDTO(
+                    productDTO.getProductId(),  // Set product ID
+                    productDTO.getProductName(), // Set product name
+                    0                           // Initialize quantity
+            );
+
+            logger.info("Fetched ProductDTO: productId={}, productName={}",
+                    productDTO.getProductId(), productDTO.getProductName());
+
+            // Send a POST request to update or create inventory
+            ResponseEntity<Void> response = restTemplate.postForEntity(url, inventoryDTO, Void.class);
+
+            // Check if the request was successful
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("Inventory updated/created successfully for product ID: {}", productDTO.getProductId());
+            } else {
+                logger.warn("Failed to update/create inventory for product ID: {}. Status code: {}",
+                        productDTO.getProductId(), response.getStatusCode());
+            }
+        } catch (Exception e) {
+            logger.error("Error occurred while updating/creating inventory for product ID: {}",
+                    productDTO.getProductId(), e);
+            throw new RuntimeException("Error occurred while updating/creating inventory.", e);
         }
     }
 
     @Override
     public ProductDTO updateProduct(String productId, ProductDTO productDTO) {
-        try{
-            Product existingProduct = productRepository.findById(productId).orElseThrow(()-> new ResourceNotFoundExcpetion("Product","ID",productId));
-            existingProduct.setName(productDTO.getName());
+        try {
+            Product existingProduct = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundExcpetion("Product", "ID", productId));
+            existingProduct.setProductName(productDTO.getProductName());
             existingProduct.setCategory(productDTO.getCategory());
             existingProduct.setSubCategory(productDTO.getSubCategory());
             existingProduct.setDescription(productDTO.getDescription());
             existingProduct.setPrice(productDTO.getPrice());
-            existingProduct.setQuantity(productDTO.getQuantity());
-
             existingProduct.setUpdatedAt(LocalDateTime.now());
 
             Product updatedProduct = productRepository.save(existingProduct);
             ProductDTO updatedProductDTO = modelMapper.map(updatedProduct, ProductDTO.class);
-            logger.info("Updated product with ID: {}",productId);
+            logger.info("Updated product with ID: {}", productId);
+
+            // Update inventory
+            autoUpdateInventory(updatedProductDTO);
+
             return updatedProductDTO;
         } catch (ResourceNotFoundExcpetion e) {
-            logger.error("Product not found with given ID: {}",productId, e);
+            logger.error("Product not found with given ID: {}", productId, e);
             throw e;
         } catch (Exception e) {
-            logger.error("Error occurred while updating user ID:{}",productId, e);
-            throw new RuntimeException("Error occurred while updating user.");
+            logger.error("Error occurred while updating product ID:{}", productId, e);
+            throw new RuntimeException("Error occurred while updating product.");
         }
     }
 
@@ -140,7 +197,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = productRepository.findById(productId)
                     .orElseThrow(()-> new ResourceNotFoundExcpetion("Product","ID", productId));
             productRepository.delete(product);
-            logger.info("Deleted product with ID: {}", productId);;
+            logger.info("Deleted product with ID: {}", productId);
         } catch (ResourceNotFoundExcpetion e) {
             logger.error("Product not found with ID: {}", productId, e);
             throw e;
